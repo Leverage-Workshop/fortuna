@@ -15,6 +15,7 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - [x] feat-002 Production DB health: `/api/health/db` → 200 in production
 - [x] feat-004 Landing page prompt box, rendered as streaming Markdown (now a chat on `POST /api/chat`)
 - [x] feat-005 NFL team report tool (experiment): `getTeamReport` via ESPN's public API, shown in the chat UI
+- [x] `DESIGN.md` design system, referenced from `AGENTS.md` (docs only; not yet applied to the app)
 
 ### What's Next
 
@@ -46,6 +47,9 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - **The landing page is a `useChat` conversation** (replacing `useCompletion`) so tool calls can be shown. The
   `/api/completion` route was removed. Tools live in `src/lib/ai/tools.ts`; `ChatMessage` types the UI parts.
 - **ESLint ignores `.claude/**` and `.agents/**`**: vendored skill example scripts broke `npm run lint` on `main`.
+- **Design system in `DESIGN.md`** (2026-11-26): adapted from a getdesign.md extraction of The Verge's 2024 site.
+  Dark only; Anton / Space Grotesk / JetBrains Mono / Newsreader via `next/font/google`; Tailwind 4 `@theme` tokens
+  in §9. It is applied in the same PR as the first UI feature, not before.
 - **PR template** at `.github/pull_request_template.md`. Core sections follow common industry guidance:
   summary/why, changes, how to review, test plan, risk/rollback. Migrations, config and screenshots are conditional.
 
@@ -55,6 +59,14 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
   The harness-creator validator scored 100/100 (baseline before the harness: 24/100).
 
 ## History
+
+### 2026-11-26: design system
+
+- Installed `DESIGN.md` with `npx getdesign@latest add theverge`, then rewrote it for Fortuna: renamed tokens,
+  open-source font substitutes, measured WCAG contrast (dropped the 3.2:1 blue link hover), and Fortuna semantics
+  (model vs market, signed edge, 0–4 constraint ramp, contaminated flag, run stream, unbuilt vs empty states).
+- `AGENTS.md` now routes UI work to `DESIGN.md`. The §9 Tailwind snippet compiles with the repo's
+  `@tailwindcss/postcss`. Full `./init.sh` passed after the Next.js 16.4.6 patch (#2).
 
 ### 2026-11-26: Next.js security patch
 
