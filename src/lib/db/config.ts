@@ -3,7 +3,7 @@ import type { PoolConfig } from "pg";
 /**
  * Builds a pg PoolConfig from environment variables.
  *
- * When DATABASE_CA_CERT is set (Aiven), TLS is verified against that CA and any
+ * When DATABASE_CA_CERT is set (Supabase), TLS is verified against that CA and any
  * `sslmode` in the URL is dropped so pg doesn't override the explicit `ssl` option.
  */
 type DbEnv = Partial<Record<"DATABASE_URL" | "DATABASE_CA_CERT", string>> & Record<string, string | undefined>;

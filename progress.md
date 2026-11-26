@@ -6,31 +6,25 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 ## Current State
 
 **Last Updated:** 2026-11-26
-**Active Feature:** none. feat-003 (full product definition) is still blocked on the product owner.
+**Active Feature:** none. feat-001 (M1 data layer) is next.
 
 ### What's Done
 
-- [x] feat-001 Phase 0 foundation (PR #1, PR #2)
-- [x] Agent harness, PR template and shipping workflow (PR #3)
-- [x] feat-002 Production DB health: `/api/health/db` → 200 in production
-- [x] feat-004 Landing page prompt box, rendered as streaming Markdown (now a chat on `POST /api/chat`)
-- [x] feat-005 NFL team report tool (experiment): `getTeamReport` via ESPN's public API, shown in the chat UI
+- [x] Bootstrapped from the Leverage Workshop skeleton (alpha-scout `962b09e`): renamed, PRD installed
+      as `docs/PRODUCT.md`, demo chat/NFL code and TimescaleDB removed, harness reset
 - [x] `DESIGN.md` design system, referenced from `AGENTS.md` (docs only; not yet applied to the app)
 
 ### What's Next
 
-1. feat-003: once the product owner answers `docs/PRODUCT.md` §9, replace feat-003 with concrete,
-   approved features (each with dependencies and a verifiable outcome).
+1. Infrastructure (README step 6): Supabase project, Vercel project and env vars, DNS.
+2. feat-001: Drizzle + the PRD's twelve-table schema.
 
 ## Blockers / Risks
 
-- **feat-003**: product owner input. No product features are authorized yet.
-- **Local `.env.local` targets Aiven production** once filled in, so `db:migrate` locally migrates production.
-  Use the Docker DB for development work.
-- **`/api/chat` is unauthenticated with no rate limit**: anyone with the URL can spend Gateway credits.
-  Caps: 20 messages, 4000 chars per message, 4096 output tokens, 4 tool steps.
-- **feat-005 uses ESPN's unofficial, unauthenticated API**: it can change or break without notice.
-- **Risk**: Aiven `developer-1` caps at 15 connections; the app pool uses `max: 5` per instance.
+- **Infrastructure not set up yet**: no Supabase project or Vercel project, so PRs get no checks and
+  the shipping workflow's `gh pr checks --watch` has nothing to wait for.
+- **eve is a 1.0 release candidate per Vercel's guide**: pin the exact version at install (PRD "Tech stack").
+- **Several data sources are non-commercial-only** (PRD "Tools and data sources"): fine for a personal tool.
 
 ## Decisions Made
 
@@ -40,67 +34,32 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
   `--quick` skips `next build`.
 - **Every finished request ships as a squash-merged PR** once checks are green (`AGENTS.md` "Shipping").
   The only checks are Vercel's, since `main` has no branch protection.
-- **Local app port is 3100** (`next dev -p 3100` / `next start -p 3100`): 3000 is used by other
-  local services. Vercel ignores this and sets its own port.
-- **Prompt box uses `useCompletion` (`@ai-sdk/react` 4.0.173, pinned to match `ai` 7.0.169) and Streamdown 2.7.1**
-  for streaming Markdown. The product owner requested it directly (feat-004).
-- **The landing page is a `useChat` conversation** (replacing `useCompletion`) so tool calls can be shown. The
-  `/api/completion` route was removed. Tools live in `src/lib/ai/tools.ts`; `ChatMessage` types the UI parts.
-- **ESLint ignores `.claude/**` and `.agents/**`**: vendored skill example scripts broke `npm run lint` on `main`.
+- **Local ports: app 3200, DB 5433**, so Fortuna runs beside alpha-scout (3100 / 5432). Vercel ignores the
+  app port and sets its own.
+- **Database: Supabase (PRD "Tech stack")**, replacing the skeleton's Aiven + TimescaleDB. Local Docker runs
+  `postgres:17` to match Supabase's major version. Plain `pg` + `db/migrations` until Drizzle lands in feat-001.
+- **PRD milestones split into feat-001..015** (2026-11-26, product owner): M1–M6 broken into smaller
+  features; feat-005 (constraint tools) may split further per lens.
+- **ESLint ignores `.claude/**` and `.agents/**`**: vendored skill example scripts don't pass lint.
 - **Design system in `DESIGN.md`** (2026-11-26): adapted from a getdesign.md extraction of The Verge's 2024 site.
   Dark only; Anton / Space Grotesk / JetBrains Mono / Newsreader via `next/font/google`; Tailwind 4 `@theme` tokens
-  in §9. It is applied in the same PR as the first UI feature, not before.
+  in §9. It is applied in the same PR as the first UI feature (feat-002), not before.
 - **PR template** at `.github/pull_request_template.md`. Core sections follow common industry guidance:
   summary/why, changes, how to review, test plan, risk/rollback. Migrations, config and screenshots are conditional.
 
 ## Evidence of Completion
 
-- 2026-11-13 harness setup: `./init.sh` passed (lint, typecheck, test, build).
-  The harness-creator validator scored 100/100 (baseline before the harness: 24/100).
+(Per-feature evidence lives in `feature_list.json`.)
 
 ## History
 
-### 2026-11-26: design system
+### 2026-11-26: bootstrap from skeleton
 
-- Installed `DESIGN.md` with `npx getdesign@latest add theverge`, then rewrote it for Fortuna: renamed tokens,
-  open-source font substitutes, measured WCAG contrast (dropped the 3.2:1 blue link hover), and Fortuna semantics
-  (model vs market, signed edge, 0–4 constraint ramp, contaminated flag, run stream, unbuilt vs empty states).
-- `AGENTS.md` now routes UI work to `DESIGN.md`. The §9 Tailwind snippet compiles with the repo's
-  `@tailwindcss/postcss`. Full `./init.sh` passed after the Next.js 16.4.6 patch (#2).
-
-### 2026-11-26: Next.js security patch
-
-- `next build` refused to run on `next@16.4.3` (`SecurityFatalError`: known security advisory). Owner approved a
-  patch bump: `next` and `eslint-config-next` 16.4.3 → 16.4.6 (exact pins; lockfile changes limited to `next`,
-  `@next/*` and `eslint-config-next`). `npm audit --omit=dev`: 0 vulnerabilities. Full `./init.sh` passed.
-
-### 2026-11-15: NFL team report tool (feat-005, experiment)
-
-- Added `getTeamReport` (team name → ESPN record, standing, next game, team-focused news) and switched the
-  landing page to `useChat` on `POST /api/chat` with `stopWhen: isStepCount(4)`. The UI shows each tool call.
-- `./init.sh` passed. A live local request called the tool for "Eagles" and streamed a grounded summary.
-
-### 2026-11-15: landing page prompt box (feat-004)
-
-- Replaced the landing copy with a textarea → `POST /api/completion` (validated, `streamText` via Gateway) →
-  streamed Markdown rendered by Streamdown. Added route, validation and component tests.
-- Fixed the lint baseline by ignoring vendored skill dirs. `./init.sh` passed; a local production server
-  with a valid model streamed a Markdown reply.
-
-### 2026-11-14: local port 3100
-
-- Pinned `npm run dev` / `npm start` to port 3100 (3000 is used by another local service).
-  `./init.sh` passed; `npm run dev` served `http://localhost:3100/` → 200.
-
-### 2026-11-13: feat-002 production DB health
-
-- The first attempt failed with `SELF_SIGNED_CERT_IN_CHAIN` because the CA was saved in Vercel as `DATABASE_CERT`.
-  Sensitive vars can't be renamed, so it was re-added as `DATABASE_CA_CERT` (Production + Preview).
-  `DATABASE_URL` was extended to Preview.
-- Verified `/api/health/db` → 200; ticked the last box in `docs/INFRASTRUCTURE.md`.
-
-### 2026-11-13: harness setup
-
-- Installed the `harness-creator` skill (walkinglabs/learn-harness-engineering) and scaffolded the harness.
-- Files: `AGENTS.md` (startup workflow, working rules, definition of done, end of session, shipping),
-  `init.sh`, `feature_list.json`, `progress.md`, `session-handoff.md`, `.github/pull_request_template.md`.
+- Followed the skeleton README: renamed alpha-scout → fortuna, installed the Fortuna PRD as `docs/PRODUCT.md`,
+  removed the streaming chat and NFL tool (the PRD lists a chat assistant as a non-goal) and their
+  `@ai-sdk/react` / `streamdown` deps, and replaced TimescaleDB with plain Postgres 17.
+- `/api/health/db` now reports the Postgres version (no extension check).
+- Verified: `npm run db:up && npm run db:migrate`, then `DATABASE_URL=…:5433/fortuna ./init.sh` passed (lint,
+  typecheck, 8 tests incl. 2 DB integration, build). `npm start` on 3200: `/api/health/db` → 200
+  (`17.12`); `/api/health/ai` → 503 `GatewayAuthenticationError` as expected with no local Gateway key.
+- Earlier the same day: `DESIGN.md` added (#1) and `next` patched 16.4.3 → 16.4.6 for a security advisory (#2).

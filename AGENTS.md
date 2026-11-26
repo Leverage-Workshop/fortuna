@@ -1,7 +1,9 @@
 # Agent guidance
 
-Read `docs/PRODUCT.md` first. Functional requirements (§7) are TBD: don't build speculative
-research, ingestion or chat features until the product owner defines them.
+Read `docs/PRODUCT.md` first: Fortuna's PRD. Its milestones (M1–M6, "MVP scope and milestones")
+are broken into the entries in `feature_list.json`; build only those. "Out of MVP" items, the
+PRD's non-goals (trading, multi-user, chat assistant) and tools marked "Later" stay unbuilt until
+the product owner approves them.
 
 ## Startup Workflow
 
@@ -19,7 +21,7 @@ Before writing code:
   test, build). `./init.sh --quick` skips the build.
 - DB integration tests run only when `DATABASE_URL` is exported (Vitest does not read
   `.env.local`): `npm run db:up && npm run db:migrate`, then
-  `DATABASE_URL=postgresql://alpha_scout:alpha_scout@localhost:5432/alpha_scout ./init.sh`.
+  `DATABASE_URL=postgresql://fortuna:fortuna@localhost:5433/fortuna ./init.sh`.
   Required for any change touching `src/lib/db`, `scripts/` or `db/migrations`.
 
 ## Working Rules
@@ -74,13 +76,17 @@ leave the PR open, record the blocker in `progress.md`, and tell the user.
 
 - Node 24, npm, committed `package-lock.json`. Pin known-compatible versions; don't bulk-upgrade.
 - `src/` uses the `@/*` alias. Server-only modules import `server-only`.
-- Database: plain `pg` for now (query layer intentionally unselected). Parameterize every query.
-  Schema changes go in a new `db/migrations/NNNN_name.sql` and are never edited after merge.
+- Database: Supabase Postgres 17 in production, `postgres:17` in Docker locally. Plain `pg` and
+  `db/migrations/NNNN_name.sql` until the PRD's Drizzle layer lands (feat-001). Parameterize
+  every query; migrations are never edited after merge.
+- Agent tools never use the Supabase service-role key: it bypasses the row-level security that
+  isolates handoff documents by agent role (PRD "How eve enforces this").
 - Secrets live in env vars only. Never use `NEXT_PUBLIC_` for DB or AI credentials.
-- AI: use the Vercel AI SDK (`ai`) via AI Gateway with `getModelId()`. No default model yet.
-  Models narrate verified results; they must not produce numeric facts or historical matches.
-- TimescaleDB on Aiven is the Apache-licensed build: no compression, continuous aggregates or
-  policies (see `docs/INFRASTRUCTURE.md`).
+- AI: models go through AI Gateway, assigned per role in one models file (PRD "Agent
+  architecture"). No default model yet. Agents return Zod-validated structured output; baseline
+  probabilities are computed in code from constraint scores, never by a model.
+- Date-bearing tools take a cutoff set by the wrapper from the run's as-of date; the model never
+  chooses it.
 - UI follows `DESIGN.md`: dark only, its tokens, type roles (mono = data, serif = model prose)
   and data semantics (model = mint, market = white, signed edge). Change a token in `DESIGN.md`
   first, then in code. Its patterns style approved features; they don't authorize new ones.

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Alpha Scout",
-  description: "Research trade setups against historical market data.",
+  title: "Fortuna",
+  description: "Geopolitical forecasts from material constraints, checked against prediction markets.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

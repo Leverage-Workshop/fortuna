@@ -30,7 +30,7 @@ solves and why this approach. Avoid vague titles like "fix bug" or "phase 1". --
 
 ### Database / migrations
 
-<!-- New db/migrations/NNNN_*.sql? Is it safe on Aiven's Apache TimescaleDB build? Is it reversible? -->
+<!-- New db/migrations/NNNN_*.sql? Is it reversible? Does it change row-level security on Supabase? -->
 
 ### Config and secrets
 
