@@ -40,7 +40,7 @@ The versions below reflect the Roux Tutor `main` branch inspected on 2026-11-07.
 | Layer | Choice | Notes |
 |---|---|---|
 | Runtime | **Node.js 24.x** | Matches Roux Tutor's `engines` and `.nvmrc` |
-| Framework | **Next.js 16.4.3** | App Router / server-side endpoints and pages |
+| Framework | **Next.js 16.4.6** | App Router / server-side endpoints and pages |
 | View layer | **React 19.3.1**, React DOM 19.3.1 | Matches reference |
 | Language | **TypeScript 5.x** | Strict typing recommended |
 | Styling | **Tailwind CSS 4.x** | Matches reference |
@@ -50,7 +50,7 @@ The versions below reflect the Roux Tutor `main` branch inspected on 2026-11-07.
 | AI integration | **Vercel AI SDK** (`ai`) | TypeScript API for generation, streaming, tool calls, structured outputs |
 | AI model gateway | **Vercel AI Gateway** | Unified model routing/authentication; model(s) TBD |
 | Tests | **Vitest 5.x**, React Testing Library 16.x, Testing Library DOM 10.x, jsdom 30.x | Match reference test approach |
-| Lint/typecheck | **ESLint 10.x**, `eslint-config-next` 16.4.3, TypeScript | Match reference |
+| Lint/typecheck | **ESLint 10.x**, `eslint-config-next` 16.4.6, TypeScript | Match reference |
 | Deployment | **Vercel** | Intended web hosting, same as Roux Tutor |
 | DNS | **Cloudflare** | Same DNS approach as Roux Tutor; domain TBD |
 | Package manager | **npm** with committed `package-lock.json` | Matches reference |

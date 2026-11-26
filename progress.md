@@ -5,7 +5,7 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 
 ## Current State
 
-**Last Updated:** 2026-11-15
+**Last Updated:** 2026-11-26
 **Active Feature:** none. feat-003 (full product definition) is still blocked on the product owner.
 
 ### What's Done
@@ -55,6 +55,12 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
   The harness-creator validator scored 100/100 (baseline before the harness: 24/100).
 
 ## History
+
+### 2026-11-26: Next.js security patch
+
+- `next build` refused to run on `next@16.4.3` (`SecurityFatalError`: known security advisory). Owner approved a
+  patch bump: `next` and `eslint-config-next` 16.4.3 → 16.4.6 (exact pins; lockfile changes limited to `next`,
+  `@next/*` and `eslint-config-next`). `npm audit --omit=dev`: 0 vulnerabilities. Full `./init.sh` passed.
 
 ### 2026-11-15: NFL team report tool (feat-005, experiment)
 
