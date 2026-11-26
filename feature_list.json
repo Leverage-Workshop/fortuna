@@ -2,44 +2,138 @@
   "features": [
     {
       "id": "feat-001",
-      "name": "Phase 0 foundation",
-      "description": "Next.js 16 / React 19 / TypeScript app with Tailwind, Base UI, Vitest, local TimescaleDB via Docker Compose, SQL migrations, AI SDK + Gateway wiring, and /api/health/db + /api/health/ai endpoints (docs/PRODUCT.md §8 Phase 0).",
+      "name": "M1: Data layer",
+      "description": "Adopt Drizzle (PRD 'Tech stack') and create the twelve tables in PRD 'Data model', with forecasts immutable once written. Migrations apply to local Docker Postgres and Supabase; DB integration tests cover the schema.",
       "dependencies": [],
-      "status": "done",
-      "evidence": "PR #1 (0aedb13) and PR #2 (a95eef7) merged to main. Production /api/health/ai returned 200 on 2026-11-13."
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
     },
     {
       "id": "feat-002",
-      "name": "Production DB health",
-      "description": "Set DATABASE_URL and DATABASE_CA_CERT in Vercel (Production + Preview), redeploy, and confirm https://alphascout.leverageworkshop.com/api/health/db returns 200. Last open item in docs/INFRASTRUCTURE.md 'Setup status'.",
+      "name": "M1: Brexit fixture and run report page",
+      "description": "Seed the PRD 'Worked example: Brexit' as a contaminated fixture run, and build the run report page as a view over the database (PRD 'Run report'). Every section is present; unbuilt sections say 'Not built yet (Mn)', built sections with no rows say 'No data for this run'. First UI feature: applies DESIGN.md.",
       "dependencies": ["feat-001"],
-      "status": "done",
-      "evidence": "2026-11-13: DATABASE_URL and DATABASE_CA_CERT set in Vercel for Production + Preview; after redeploy, GET https://alphascout.leverageworkshop.com/api/health/db -> 200 {\"ok\":true,\"postgresVersion\":\"18.6\",\"timescaleVersion\":\"2.30.2\"}."
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
     },
     {
       "id": "feat-003",
-      "name": "Phase 1 product definition",
-      "description": "Product owner answers docs/PRODUCT.md §9 (query input, answer contents, instruments/granularity, similarity approach, single vs multi-user) and fills in functional requirements (§7). Afterwards, replace this entry with the concrete, approved MVP features.",
+      "name": "M1: eve setup and scenario parser",
+      "description": "Install eve (pinned), add the one models file assigning per-role models via AI Gateway, and build the scenario parser subagent: scenario text + as-of date -> Zod-validated actors (with regime type), decision points, options, horizon and resolution question, stored in the database with run trace and cost.",
       "dependencies": ["feat-001"],
-      "status": "blocked",
-      "blocked_on": "Product owner input. Do not add speculative research, ingestion or chat features before then.",
+      "status": "not-started",
+      "blocked_on": "",
       "evidence": ""
     },
     {
       "id": "feat-004",
-      "name": "Landing page prompt box",
-      "description": "Product owner request (2026-11-15): replace the landing page copy with a textbox that sends the prompt to the configured Gateway model (AI_MODEL_ID) via POST /api/completion and renders the streamed response as Markdown (Streamdown).",
-      "dependencies": ["feat-001"],
-      "status": "done",
-      "evidence": "2026-11-15: ./init.sh passed (lint, typecheck, 20 tests incl. route + component tests, build). Local `next start` with AI_MODEL_ID=openai/gpt-6-luna streamed a Markdown reply from /api/completion. The AI_MODEL_ID in .env.local (openai/gpt-6.1-luna) is not in the Gateway catalog and yields a stream error."
+      "name": "M2: Tool runtime and handoff documents",
+      "description": "Tool wrapper that sets the cutoff from the run's as-of date, records every call in tool_calls (args, cutoff, result summary, source URL, retrieval time), and the shared tools read_document, write_document and get_brief. Handoff reads are filtered by the caller's role allowlist in code and by Supabase row-level security via a short-lived signed role token; never the service-role key.",
+      "dependencies": ["feat-003"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
     },
     {
       "id": "feat-005",
-      "name": "NFL team report tool (experiment)",
-      "description": "Product owner request (2026-11-15, exploratory): a getTeamReport AI tool that takes a team name and returns the NFL team's record, standing, next game and recent news from ESPN's public API. The landing chat (useChat, POST /api/chat) shows the tool call and the model's Markdown reply. Not part of the trading product; remove when no longer wanted.",
+      "name": "M2: Constraint data tools",
+      "description": "The MVP-phase tools for the four constraint lenses in PRD 'Tools and data sources' (political, macro/financial, geopolitical, legal) plus web_search, each returning signals against a baseline with source URL and retrieval time. Confirm the remaining sources' access terms first. Likely split per lens when started.",
       "dependencies": ["feat-004"],
-      "status": "done",
-      "evidence": "2026-11-15: ./init.sh passed (35 tests incl. team matching, news filtering, chat request validation, route and UI tests). Live POST /api/chat on the local dev server: the model called getTeamReport({team:'Eagles'}) -> 2-7, 4th in NFC East, 5 news items, then streamed a Markdown summary with an ESPN link."
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-006",
+      "name": "M2: Constraint agents",
+      "description": "Four constraint subagents run in parallel, blind to actor rhetoric and to each other, scoring every option 0-4 with evidence for scores of 2+ (regime-specific political checklist). Scores and evidence are stored; the legal-score rule from the constraint hierarchy is applied. The report's constraint matrix, evidence ledger and handoff document sections fill in.",
+      "dependencies": ["feat-005"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-007",
+      "name": "M3: Actor and consensus agents",
+      "description": "One actor subagent per actor (ranked options, preference strength 0-4, date-bounded search) and the consensus agent (basic news and analyst search via search_news / web_search). The report's actor preferences and consensus sections fill in.",
+      "dependencies": ["feat-004"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-008",
+      "name": "M3: Aggregation and judge",
+      "description": "Code-side aggregation per PRD 'Aggregation rules' (prune on 4 except legal, baseline weight e^(-k x load) with k=0.5, preferences only within one point of the lowest load), then a judge subagent on a different vendor from the constraint agents that may override with a logged reason, never seeing the market price. Writes immutable forecasts.",
+      "dependencies": ["feat-006", "feat-007"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-009",
+      "name": "M3: Decision tree and streaming run view",
+      "description": "Render the pruned decision tree with branch probabilities (pruned options struck through with the binding lens) and the 'From scores to probabilities' section, and stream each agent's progress into the run view with AI Elements.",
+      "dependencies": ["feat-008"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-010",
+      "name": "M4: Scenario intake and parse approval",
+      "description": "Scenario intake form (text + as-of date), and an orchestrator approval tool (approval: always()) that pauses the durable run after parsing until the user approves or edits actors, regime types and options. Nothing expensive starts before approval; edits are recorded for the report.",
+      "dependencies": ["feat-003", "feat-009"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-011",
+      "name": "M5: Venue adapters",
+      "description": "One venue adapter interface (search contracts, fetch resolution rules, fetch price, fetch price history), implemented read-only for Kalshi and international Polymarket through their public endpoints.",
+      "dependencies": ["feat-001"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-012",
+      "name": "M5: Market mapper and edge",
+      "description": "Market mapper subagent scores resolution-rule fit (0-1); below 0.8 the user confirms or rewrites the question. Edge = engine probability minus market mid in points, flagged at |edge| >= 10 (configurable) with a minimum volume; cross-venue spread shown. The report's market comparison section fills in.",
+      "dependencies": ["feat-008", "feat-011"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-013",
+      "name": "M5: Daily market snapshots",
+      "description": "A scheduled job that snapshots linked contracts' prices daily into market_snapshots, plus one snapshot at forecast time.",
+      "dependencies": ["feat-012"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-014",
+      "name": "M6: Resolution and Brier scoring",
+      "description": "The scheduled job checks linked contracts for resolution and scores every non-contaminated forecast version (Brier, engine vs market, which lens was most wrong). The report's resolution and score section fills in.",
+      "dependencies": ["feat-013"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
+    },
+    {
+      "id": "feat-015",
+      "name": "M6: Track record page",
+      "description": "Brier score engine vs market, calibration curve, paper P&L on flagged edges, override record and constraint attribution across all scored forecasts.",
+      "dependencies": ["feat-014"],
+      "status": "not-started",
+      "blocked_on": "",
+      "evidence": ""
     }
   ]
 }

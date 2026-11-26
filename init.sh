@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Standard startup + verification path for Alpha Scout. Run from the repo root.
+# Standard startup + verification path for Fortuna. Run from the repo root.
 #   ./init.sh          lint, typecheck, test, build (the pre-push gate from AGENTS.md)
 #   ./init.sh --quick  same, minus `npm run build`
 # DB integration tests run only when DATABASE_URL is exported (Vitest does not read .env.local):
 #   npm run db:up && npm run db:migrate
-#   DATABASE_URL=postgresql://alpha_scout:alpha_scout@localhost:5432/alpha_scout ./init.sh
+#   DATABASE_URL=postgresql://fortuna:fortuna@localhost:5433/fortuna ./init.sh
 set -euo pipefail
 
 cd "$(dirname "$0")"

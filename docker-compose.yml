@@ -1,18 +1,18 @@
-# Local TimescaleDB-enabled Postgres. Versions match the Aiven service
-# (PostgreSQL 18, TimescaleDB 2.30.2).
+# Local Postgres for development and DB integration tests. Major version matches Supabase
+# (PostgreSQL 17). Host port 5433 so it can run beside other local projects on 5432.
 services:
   db:
-    image: timescale/timescaledb:2.30.2-pg18
+    image: postgres:17
     environment:
-      POSTGRES_USER: alpha_scout
-      POSTGRES_PASSWORD: alpha_scout
-      POSTGRES_DB: alpha_scout
+      POSTGRES_USER: fortuna
+      POSTGRES_PASSWORD: fortuna
+      POSTGRES_DB: fortuna
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - db-data:/var/lib/postgresql
+      - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U alpha_scout -d alpha_scout"]
+      test: ["CMD-SHELL", "pg_isready -U fortuna -d fortuna"]
       interval: 2s
       timeout: 5s
       retries: 30

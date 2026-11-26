@@ -2,7 +2,7 @@
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { buildPoolConfig } from "@/lib/db/config";
-import { checkTimescale } from "@/lib/db/timescale";
+import { checkDatabase } from "@/lib/db/health";
 
 describe.skipIf(!process.env.DATABASE_URL)("database (integration)", () => {
   let client: pg.Client;
@@ -16,21 +16,13 @@ describe.skipIf(!process.env.DATABASE_URL)("database (integration)", () => {
     await client?.end();
   });
 
-  test("timescaledb is enabled", async () => {
-    const status = await checkTimescale(client);
-    expect(status.ok).toBe(true);
+  test("reports a Postgres 17 server, matching Supabase", async () => {
+    const status = await checkDatabase(client);
+    expect(status.ok && status.postgresVersion.split(".")[0]).toBe("17");
   });
 
-  test("hypertables can be created", async () => {
-    await client.query("BEGIN");
-    try {
-      await client.query("CREATE TABLE hypertable_probe (ts timestamptz NOT NULL, v double precision)");
-      const { rows } = await client.query(
-        "SELECT created FROM create_hypertable('hypertable_probe', by_range('ts'))",
-      );
-      expect(rows[0]?.created).toBe(true);
-    } finally {
-      await client.query("ROLLBACK");
-    }
+  test("the migration runner has recorded its table", async () => {
+    const { rows } = await client.query("SELECT to_regclass('public.schema_migrations') AS t");
+    expect(rows[0]?.t).toBe("schema_migrations");
   });
 });
