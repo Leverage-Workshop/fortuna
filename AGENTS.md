@@ -7,7 +7,8 @@ research, ingestion or chat features until the product owner defines them.
 
 Before writing code:
 
-1. Read this file and `docs/PRODUCT.md` (plus `docs/INFRASTRUCTURE.md` for DB/hosting work).
+1. Read this file and `docs/PRODUCT.md` (plus `docs/INFRASTRUCTURE.md` for DB/hosting work, and
+   `DESIGN.md` for any UI work).
 2. Read `progress.md` (current state, blockers) and `feature_list.json` (feature status).
 3. Run `./init.sh`. If the baseline fails, fix that before adding scope.
 4. Check recent work with `git log --oneline -5`.
@@ -80,6 +81,9 @@ leave the PR open, record the blocker in `progress.md`, and tell the user.
   Models narrate verified results; they must not produce numeric facts or historical matches.
 - TimescaleDB on Aiven is the Apache-licensed build: no compression, continuous aggregates or
   policies (see `docs/INFRASTRUCTURE.md`).
+- UI follows `DESIGN.md`: dark only, its tokens, type roles (mono = data, serif = model prose)
+  and data semantics (model = mint, market = white, signed edge). Change a token in `DESIGN.md`
+  first, then in code. Its patterns style approved features; they don't authorize new ones.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
