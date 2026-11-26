@@ -1,18 +1,32 @@
 # Infrastructure
 
-Fill in each section as the resource is created. Nothing below exists yet.
-
 ## Database: Supabase Postgres
 
 | | |
 |---|---|
-| Project | TBD |
-| Region | TBD |
-| PostgreSQL | 17 (local Docker matches the major version) |
+| Organization | Leverage Workshop |
+| Project | `fortuna` (ref `fgmvtpflzhngzwbliyqf`) |
+| Region | `us-east-2` (Ohio) |
+| PostgreSQL | 17.12 (local Docker runs `postgres:17` to match the major version) |
+| App connection | Shared pooler (Supavisor), **transaction mode**, port 6543 |
 
-**TLS:** `pg` treats `sslmode=require` as full verification. Set `DATABASE_CA_CERT` to the
-Supabase project's CA PEM so verification succeeds; literal `\n` sequences are accepted for
-single-line env values.
+**Why the transaction pooler:** the direct host `db.<ref>.supabase.co` is IPv6-only, which Vercel
+functions can't reach, and transaction mode is Supabase's recommendation for serverless. Get the
+string from the dashboard's Connect panel:
+`https://supabase.com/dashboard/project/fgmvtpflzhngzwbliyqf?showConnect=true&method=transaction`.
+User is `postgres.fgmvtpflzhngzwbliyqf`; append `?sslmode=require`. The password is reset from
+Database Settings and lives only in Vercel and your `.env.local`.
+
+**TLS:** `pg` treats `sslmode=require` as full verification, so `DATABASE_CA_CERT` holds the
+Supabase Root 2021 CA:
+
+- Source: `https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt`
+  (the dashboard's SSL Configuration download)
+- SHA-256: `80:70:25:AD:50:D4:ED:21:9D:2C:9C:7D:29:9C:00:4F:82:4E:B0:0C:F7:F6:5A:FE:F6:07:D0:7B:72:E6:CA:FA`
+- Valid until 2031-04-26. Checked 2026-11-26: both `aws-0-` and `aws-1-us-east-2.pooler.supabase.com:6543`
+  present `*.pooler.supabase.com` → Supabase Intermediate 2021 CA → this root, hostname verified.
+
+Literal `\n` sequences are accepted for single-line env values.
 
 **Row-level security:** agent tools reach `handoff_documents` with a short-lived token carrying
 the caller's `agent_role`, never the service-role key (PRD "How eve enforces this").
@@ -22,17 +36,19 @@ the caller's `agent_role`, never the service-role key (PRD "How eve enforces thi
 | | |
 |---|---|
 | Team | Leverage Workshop's projects |
-| Project | TBD (`fortuna`) |
+| Project | `fortuna` (`prj_00ZBqixWLATHsyMI8w4RTk1arx1u`) |
 | Git | `Leverage-Workshop/fortuna`, production branch `main` |
-| Node | 24.x |
+| Framework / Node | Next.js preset, 24.x |
+| Function region | `cle1` (Cleveland), next to the Supabase database in `us-east-2` |
+| Deployment protection | Vercel Authentication on everything except custom domains |
 
 Health checks: `/api/health/db` and `/api/health/ai` (both return 503 on failure).
 
 Environment variables (server-only, Production + Preview):
 
-- `DATABASE_URL`: Supabase connection string (sensitive)
-- `DATABASE_CA_CERT`: Supabase CA PEM
-- `AI_MODEL_ID`: unset until a model is chosen
+- `DATABASE_URL`: Supabase transaction-pooler string (sensitive)
+- `DATABASE_CA_CERT`: Supabase Root 2021 CA PEM (encrypted; public certificate)
+- `AI_MODEL_ID`: unset until feat-003 assigns per-role models
 
 AI Gateway authenticates with Vercel OIDC on deployments, so no `AI_GATEWAY_API_KEY` is
 set in Vercel. For local Gateway calls, set `AI_GATEWAY_API_KEY` in `.env.local` or run
@@ -43,14 +59,16 @@ set in Vercel. For local Gateway calls, set `AI_GATEWAY_API_KEY` in `.env.local`
 | | |
 |---|---|
 | Zone | `leverageworkshop.com` |
-| Record | TBD CNAME → Vercel-assigned target, **DNS only** (not proxied) |
+| Record | `fortuna` CNAME → `7cd5d845d0aa0885.vercel-dns-017.com`, **DNS only** (not proxied) |
+| URL | https://fortuna.leverageworkshop.com |
 
-Keep the record unproxied so Vercel can issue and renew the TLS certificate.
+Keep the record unproxied so Vercel can issue and renew the TLS certificate. The project's
+`.mcp.json` registers Cloudflare's MCP server (`cloudflare-api`) for DNS changes.
 
 ## Setup status
 
-- [ ] Supabase project created; migrations applied
-- [ ] Vercel project created, linked to GitHub, Node 24, Next.js preset
-- [ ] `DATABASE_URL` and `DATABASE_CA_CERT` set in Vercel (Production + Preview); `/api/health/db` → 200
-- [ ] AI Gateway reachable from Vercel via OIDC (`/api/health/ai` → 200)
-- [ ] Domain added to Vercel and CNAME'd in Cloudflare; TLS issued
+- [x] Supabase project created (2026-11-26); no migrations to apply yet (feat-001 adds the schema)
+- [x] Vercel project created, linked to GitHub, Node 24, Next.js preset, functions in `cle1`
+- [x] `DATABASE_URL` and `DATABASE_CA_CERT` set in Vercel (Production + Preview); `/api/health/db` → 200 (2026-11-26)
+- [x] AI Gateway reachable from Vercel via OIDC (`/api/health/ai` → 200)
+- [x] `fortuna.leverageworkshop.com` added to Vercel and CNAME'd in Cloudflare; TLS issued
