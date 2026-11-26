@@ -13,16 +13,15 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - [x] Bootstrapped from the Leverage Workshop skeleton (alpha-scout `962b09e`): renamed, PRD installed
       as `docs/PRODUCT.md`, demo chat/NFL code and TimescaleDB removed, harness reset
 - [x] `DESIGN.md` design system, referenced from `AGENTS.md` (docs only; not yet applied to the app)
+- [x] Infrastructure: Supabase `fortuna`, Vercel `fortuna` (functions in `cle1`), https://fortuna.leverageworkshop.com
+      with `/api/health/db` and `/api/health/ai` → 200
 
 ### What's Next
 
-1. Infrastructure (README step 6): Supabase project, Vercel project and env vars, DNS.
-2. feat-001: Drizzle + the PRD's twelve-table schema.
+1. feat-001: Drizzle + the PRD's twelve-table schema.
 
 ## Blockers / Risks
 
-- **Infrastructure not set up yet**: no Supabase project or Vercel project, so PRs get no checks and
-  the shipping workflow's `gh pr checks --watch` has nothing to wait for.
 - **eve is a 1.0 release candidate per Vercel's guide**: pin the exact version at install (PRD "Tech stack").
 - **Several data sources are non-commercial-only** (PRD "Tools and data sources"): fine for a personal tool.
 
@@ -38,6 +37,9 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
   app port and sets its own.
 - **Database: Supabase (PRD "Tech stack")**, replacing the skeleton's Aiven + TimescaleDB. Local Docker runs
   `postgres:17` to match Supabase's major version. Plain `pg` + `db/migrations` until Drizzle lands in feat-001.
+- **Supabase via the transaction pooler (port 6543)**: the direct host is IPv6-only and unreachable from Vercel.
+  TLS is verified against the Supabase Root 2021 CA (fingerprint in `docs/INFRASTRUCTURE.md`).
+- **Vercel functions run in `cle1`** (Cleveland), next to Supabase `us-east-2` (Ohio).
 - **PRD milestones split into feat-001..015** (2026-11-26, product owner): M1–M6 broken into smaller
   features; feat-005 (constraint tools) may split further per lens.
 - **ESLint ignores `.claude/**` and `.agents/**`**: vendored skill example scripts don't pass lint.
@@ -52,6 +54,15 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 (Per-feature evidence lives in `feature_list.json`.)
 
 ## History
+
+### 2026-11-26: infrastructure (README step 6)
+
+- Created Supabase project `fortuna` (`us-east-2`, Postgres 17.12) and Vercel project `fortuna` linked to the repo,
+  functions moved to `cle1`. Owner set `DATABASE_URL` (transaction pooler); `DATABASE_CA_CERT` set from Supabase's
+  published root CA after checking it against both us-east-2 pooler chains. Cloudflare CNAME `fortuna` → Vercel, DNS only.
+- Added `.mcp.json` with Cloudflare's MCP server. `AI_MODEL_ID` stays unset until feat-003.
+- Verified on https://fortuna.leverageworkshop.com: `/` → 200, `/api/health/db` → 200 `{"ok":true,"postgresVersion":"17.12"}`,
+  `/api/health/ai` → 200.
 
 ### 2026-11-26: bootstrap from skeleton
 
