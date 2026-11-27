@@ -33,6 +33,7 @@ npm install
 cp .env.example .env.local      # defaults point at the local Docker DB
 npm run db:up                   # Postgres 17, host port 5433
 npm run db:migrate              # applies the Drizzle migrations in db/migrations
+npm run db:seed:brexit          # optional: the PRD's Brexit walkthrough as a fixture run
 npm run dev                     # http://localhost:3200
 ```
 
@@ -46,6 +47,7 @@ npm run dev                     # http://localhost:3200
 | `db:migrate` | Apply pending migrations (tracked in `drizzle.__drizzle_migrations`) |
 | `db:generate` | Generate a migration from schema changes: `npm run db:generate -- --name <change>` (add `--custom` for hand-written SQL) |
 | `db:drift` | Fail if the schema has changes with no migration (run by `./init.sh`) |
+| `db:seed:brexit` | Seed the PRD's Brexit worked example as a contaminated fixture run (idempotent; forecasts can't be removed afterwards) |
 | `./init.sh [--quick]` | The full pre-push gate: `npm ci` if needed, lint, typecheck, schema drift, test, build |
 
 DB integration tests in `tests/` run only when `DATABASE_URL` is exported (Vitest doesn't read

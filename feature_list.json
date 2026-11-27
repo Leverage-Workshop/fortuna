@@ -14,9 +14,9 @@
       "name": "M1: Brexit fixture and run report page",
       "description": "Seed the PRD 'Worked example: Brexit' as a contaminated fixture run, and build the run report page as a view over the database (PRD 'Run report'). Every section is present; unbuilt sections say 'Not built yet (Mn)', built sections with no rows say 'No data for this run'. First UI feature: applies DESIGN.md.",
       "dependencies": ["feat-001"],
-      "status": "not-started",
+      "status": "done",
       "blocked_on": "",
-      "evidence": ""
+      "evidence": "Branch feat/brexit-run-report. Fixture seeded to local postgres:17 with npm run db:seed:brexit (re-run is a no-op); DATABASE_URL=...:5433/fortuna ./init.sh passed (lint, typecheck, db:drift, 51 tests incl. 20 DB integration, build). next start: / 200, /runs/b2e01600-0000-4000-8000-000000000002 200 with 3 built + 9 'Not built yet (Mn)' sections, unknown/malformed run IDs 404; screenshots at 1440px and 375px. Supabase seed pending owner approval (permanent)."
     },
     {
       "id": "feat-003",

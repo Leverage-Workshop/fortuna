@@ -14,8 +14,8 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import { agentRole, constraintLens, runStatus } from "./enums";
-import { options, scenarios } from "./scenarios";
+import { agentRole, constraintLens, runStatus } from "./enums.ts";
+import { options, scenarios } from "./scenarios.ts";
 
 const usd = (name: string) => numeric(name, { precision: 12, scale: 6, mode: "number" });
 

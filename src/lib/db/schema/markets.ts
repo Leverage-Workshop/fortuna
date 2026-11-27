@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, doublePrecision, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { venue } from "./enums";
-import { scenarios } from "./scenarios";
+import { venue } from "./enums.ts";
+import { scenarios } from "./scenarios.ts";
 
 /** A Kalshi or Polymarket contract matched to a scenario, with its resolution-rule fit (0–1). */
 export const marketLinks = pgTable(
