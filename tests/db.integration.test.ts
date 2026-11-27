@@ -22,7 +22,7 @@ describe.skipIf(!process.env.DATABASE_URL)("database (integration)", () => {
   });
 
   test("the migration runner has recorded its table", async () => {
-    const { rows } = await client.query("SELECT to_regclass('public.schema_migrations') AS t");
-    expect(rows[0]?.t).toBe("schema_migrations");
+    const { rows } = await client.query("SELECT to_regclass('drizzle.__drizzle_migrations') AS t");
+    expect(rows[0]?.t).toBe("drizzle.__drizzle_migrations");
   });
 });

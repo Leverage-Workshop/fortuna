@@ -18,7 +18,7 @@ Before writing code:
 ## Verification Commands
 
 - `./init.sh`: the pre-push gate (`npm ci` when the lockfile changed, then lint, typecheck,
-  test, build). `./init.sh --quick` skips the build.
+  schema drift, test, build). `./init.sh --quick` skips the build.
 - DB integration tests run only when `DATABASE_URL` is exported (Vitest does not read
   `.env.local`): `npm run db:up && npm run db:migrate`, then
   `DATABASE_URL=postgresql://fortuna:fortuna@localhost:5433/fortuna ./init.sh`.
@@ -76,9 +76,10 @@ leave the PR open, record the blocker in `progress.md`, and tell the user.
 
 - Node 24, npm, committed `package-lock.json`. Pin known-compatible versions; don't bulk-upgrade.
 - `src/` uses the `@/*` alias. Server-only modules import `server-only`.
-- Database: Supabase Postgres 17 in production, `postgres:17` in Docker locally. Plain `pg` and
-  `db/migrations/NNNN_name.sql` until the PRD's Drizzle layer lands (feat-001). Parameterize
-  every query; migrations are never edited after merge.
+- Database: Supabase Postgres 17 in production, `postgres:17` in Docker locally, through Drizzle.
+  Change `src/lib/db/schema` first, then `npm run db:generate -- --name <change>` (`--custom` for
+  SQL Drizzle can't express, such as triggers); `./init.sh` fails on schema drift. Every table
+  enables row-level security. Parameterize every query; migrations are never edited after merge.
 - Agent tools never use the Supabase service-role key: it bypasses the row-level security that
   isolates handoff documents by agent role (PRD "How eve enforces this").
 - Secrets live in env vars only. Never use `NEXT_PUBLIC_` for DB or AI credentials.

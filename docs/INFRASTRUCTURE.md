@@ -28,8 +28,18 @@ Supabase Root 2021 CA:
 
 Literal `\n` sequences are accepted for single-line env values.
 
-**Row-level security:** agent tools reach `handoff_documents` with a short-lived token carrying
-the caller's `agent_role`, never the service-role key (PRD "How eve enforces this").
+**Migrations:** Drizzle migrations in `db/migrations` are applied by hand, never at build time,
+because Preview and Production share this database. Put the production `DATABASE_URL` and
+`DATABASE_CA_CERT` in a gitignored `.env.supabase`, then run
+`node --env-file=.env.supabase scripts/migrate.ts`. The runner records each migration in
+`drizzle.__drizzle_migrations` and applies pending ones in a single transaction. Apply a PR's
+migrations before merging it if its code depends on them.
+
+**Row-level security:** every table has RLS enabled with no policies, so Supabase's `anon` and
+`authenticated` API roles can read nothing; the app connects as the table owner, which bypasses
+it. feat-004 adds the handoff-document policy: agent tools reach `handoff_documents` with a
+short-lived token carrying the caller's `agent_role`, never the service-role key (PRD "How eve
+enforces this").
 
 ## Hosting: Vercel
 
@@ -67,7 +77,7 @@ Keep the record unproxied so Vercel can issue and renew the TLS certificate. The
 
 ## Setup status
 
-- [x] Supabase project created (2026-11-26); no migrations to apply yet (feat-001 adds the schema)
+- [x] Supabase project created (2026-11-26); feat-001 migrations `0000`–`0001` applied (2026-11-27)
 - [x] Vercel project created, linked to GitHub, Node 24, Next.js preset, functions in `cle1`
 - [x] `DATABASE_URL` and `DATABASE_CA_CERT` set in Vercel (Production + Preview); `/api/health/db` → 200 (2026-11-26)
 - [x] AI Gateway reachable from Vercel via OIDC (`/api/health/ai` → 200)

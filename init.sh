@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Standard startup + verification path for Fortuna. Run from the repo root.
-#   ./init.sh          lint, typecheck, test, build (the pre-push gate from AGENTS.md)
+#   ./init.sh          lint, typecheck, schema drift, test, build (the pre-push gate from AGENTS.md)
 #   ./init.sh --quick  same, minus `npm run build`
 # DB integration tests run only when DATABASE_URL is exported (Vitest does not read .env.local):
 #   npm run db:up && npm run db:migrate
@@ -37,6 +37,9 @@ npm run lint
 
 echo "=== npm run typecheck ==="
 npm run typecheck
+
+echo "=== npm run db:drift ==="
+npm run db:drift
 
 echo "=== npm test ==="
 if [ -z "${DATABASE_URL:-}" ]; then

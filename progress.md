@@ -5,8 +5,8 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 
 ## Current State
 
-**Last Updated:** 2026-11-26
-**Active Feature:** none. feat-001 (M1 data layer) is next.
+**Last Updated:** 2026-11-27
+**Active Feature:** none. feat-001 (M1 data layer) is done; next is feat-002 or feat-003.
 
 ### What's Done
 
@@ -16,9 +16,13 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - [x] Infrastructure: Supabase `fortuna`, Vercel `fortuna` (functions in `cle1`), https://fortuna.leverageworkshop.com
       with `/api/health/db` and `/api/health/ai` → 200
 
+- [x] feat-001: Drizzle 0.45.4 / drizzle-kit 0.31.11, the twelve PRD tables (RLS on, no policies),
+      immutable forecasts (trigger + RESTRICT FK), schema-drift check in `./init.sh`; migrations
+      applied to Supabase (2026-11-27)
+
 ### What's Next
 
-1. feat-001: Drizzle + the PRD's twelve-table schema.
+1. feat-002 (Brexit fixture + run report) or feat-003 (eve + parser); both depend only on feat-001.
 
 ## Blockers / Risks
 
@@ -35,6 +39,17 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
   The only checks are Vercel's, since `main` has no branch protection.
 - **Local ports: app 3200, DB 5433**, so Fortuna runs beside alpha-scout (3100 / 5432). Vercel ignores the
   app port and sets its own.
+- **Drizzle schema conventions (feat-001)**: schema in `src/lib/db/schema`, generated SQL in `db/migrations`
+  (drizzle-kit journal), applied by `scripts/migrate.ts` via Drizzle's migrator with our TLS config. Migrations run by
+  hand on Supabase, never at build time, since Preview and Production share one database. Additions beyond the PRD's
+  key fields: `decision_points.label`; `decision_points.position` (PRD `order`, a reserved word); run `finished_at`;
+  per-agent tokens/cost/duration on `agent_outputs` (run trace section); `venue` in the `market_snapshots` key, since
+  Kalshi and Polymarket IDs are independent. `scenarios.contaminated` has no default, so callers must decide.
+- **Forecast immutability**: a trigger rejects DELETE, TRUNCATE and UPDATEs that change any original column; columns
+  added later (feat-014's resolution and Brier fields) stay writable. A probability off the code baseline must carry
+  `override_reason` (CHECK).
+- **RLS on every table, no policies yet**: Supabase's API roles read nothing; the app connects as owner. feat-004 adds
+  the handoff-document policy. The "evidence for scores of 2+" rule is left to feat-006's Zod validation, not the DB.
 - **Database: Supabase (PRD "Tech stack")**, replacing the skeleton's Aiven + TimescaleDB. Local Docker runs
   `postgres:17` to match Supabase's major version. Plain `pg` + `db/migrations` until Drizzle lands in feat-001.
 - **Supabase via the transaction pooler (port 6543)**: the direct host is IPv6-only and unreachable from Vercel.
@@ -54,6 +69,25 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 (Per-feature evidence lives in `feature_list.json`.)
 
 ## History
+
+### 2026-11-27: feat-001 Supabase verification
+
+- Owner applied `0000_init_schema` and `0001_forecasts_immutable` to Supabase `fortuna` with `scripts/migrate.ts`.
+- Verified via the Supabase MCP: all twelve tables in `public` with RLS on; `drizzle.__drizzle_migrations` holds two
+  rows whose hashes match the SHA-256 of the local SQL files; `forecasts_immutable_row` and
+  `forecasts_immutable_truncate` triggers present; `forecasts.run_id` FK is `ON DELETE RESTRICT`. Security advisor
+  reports only the INFO lint `rls_enabled_no_policy` on the twelve tables, which is the intended deny-all until feat-004.
+- feat-001 marked done; PR #5 merged.
+
+### 2026-11-26: feat-001 data layer
+
+- Installed `drizzle-orm@0.45.4` and `drizzle-kit@0.31.11` (exact pins). Added the twelve-table schema, migrations
+  `0000_init_schema` and `0001_forecasts_immutable`, a Drizzle client (`src/lib/db/client.ts`), `db:generate` and
+  `db:drift` scripts, and the drift step in `./init.sh`. Dropped the old runner's empty `schema_migrations` table from
+  local Docker (Supabase never had it).
+- Verified locally: `npm run db:migrate` twice (second run no-op), then
+  `DATABASE_URL=…:5433/fortuna ./init.sh` passed: 24 tests, 15 of them DB integration (tables + RLS, typed round
+  trip, immutability incl. TRUNCATE and FK RESTRICT, CHECKs). Drift check confirmed to fail on an unmigrated column.
 
 ### 2026-11-26: infrastructure (README step 6)
 
