@@ -77,7 +77,7 @@ Keep the record unproxied so Vercel can issue and renew the TLS certificate. The
 
 ## Setup status
 
-- [x] Supabase project created (2026-11-26); no migrations to apply yet (feat-001 adds the schema)
+- [x] Supabase project created (2026-11-26); feat-001 migrations `0000`–`0001` applied (2026-11-27)
 - [x] Vercel project created, linked to GitHub, Node 24, Next.js preset, functions in `cle1`
 - [x] `DATABASE_URL` and `DATABASE_CA_CERT` set in Vercel (Production + Preview); `/api/health/db` → 200 (2026-11-26)
 - [x] AI Gateway reachable from Vercel via OIDC (`/api/health/ai` → 200)

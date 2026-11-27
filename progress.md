@@ -5,8 +5,8 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 
 ## Current State
 
-**Last Updated:** 2026-11-26
-**Active Feature:** feat-001 (M1 data layer): built and verified locally; Supabase migration pending.
+**Last Updated:** 2026-11-27
+**Active Feature:** none. feat-001 (M1 data layer) is done; next is feat-002 or feat-003.
 
 ### What's Done
 
@@ -16,13 +16,13 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - [x] Infrastructure: Supabase `fortuna`, Vercel `fortuna` (functions in `cle1`), https://fortuna.leverageworkshop.com
       with `/api/health/db` and `/api/health/ai` → 200
 
-- [~] feat-001: Drizzle 0.45.4 / drizzle-kit 0.31.11, the twelve PRD tables (RLS on, no policies),
-      immutable forecasts (trigger + RESTRICT FK), schema-drift check in `./init.sh`
+- [x] feat-001: Drizzle 0.45.4 / drizzle-kit 0.31.11, the twelve PRD tables (RLS on, no policies),
+      immutable forecasts (trigger + RESTRICT FK), schema-drift check in `./init.sh`; migrations
+      applied to Supabase (2026-11-27)
 
 ### What's Next
 
-1. feat-001: apply the migrations to Supabase (`docs/INFRASTRUCTURE.md` "Migrations"), then merge.
-2. Then feat-002 (Brexit fixture + run report) or feat-003 (eve + parser); both depend only on feat-001.
+1. feat-002 (Brexit fixture + run report) or feat-003 (eve + parser); both depend only on feat-001.
 
 ## Blockers / Risks
 
@@ -69,6 +69,15 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 (Per-feature evidence lives in `feature_list.json`.)
 
 ## History
+
+### 2026-11-27: feat-001 Supabase verification
+
+- Owner applied `0000_init_schema` and `0001_forecasts_immutable` to Supabase `fortuna` with `scripts/migrate.ts`.
+- Verified via the Supabase MCP: all twelve tables in `public` with RLS on; `drizzle.__drizzle_migrations` holds two
+  rows whose hashes match the SHA-256 of the local SQL files; `forecasts_immutable_row` and
+  `forecasts_immutable_truncate` triggers present; `forecasts.run_id` FK is `ON DELETE RESTRICT`. Security advisor
+  reports only the INFO lint `rls_enabled_no_policy` on the twelve tables, which is the intended deny-all until feat-004.
+- feat-001 marked done; PR #5 merged.
 
 ### 2026-11-26: feat-001 data layer
 
