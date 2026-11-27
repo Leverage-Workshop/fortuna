@@ -16,11 +16,14 @@
     "test:watch": "vitest",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
-    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts"
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:drift": "scripts/check-schema-drift.sh"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "ai": "^7.0.169",
+    "drizzle-orm": "0.45.4",
     "next": "16.4.6",
     "pg": "^8.23.1",
     "react": "19.3.1",
@@ -38,6 +41,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.3.0",
+    "drizzle-kit": "0.31.11",
     "eslint": "^10.0.0",
     "eslint-config-next": "16.4.6",
     "jsdom": "^30.0.0",

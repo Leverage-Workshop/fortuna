@@ -28,8 +28,18 @@ Supabase Root 2021 CA:
 
 Literal `\n` sequences are accepted for single-line env values.
 
-**Row-level security:** agent tools reach `handoff_documents` with a short-lived token carrying
-the caller's `agent_role`, never the service-role key (PRD "How eve enforces this").
+**Migrations:** Drizzle migrations in `db/migrations` are applied by hand, never at build time,
+because Preview and Production share this database. Put the production `DATABASE_URL` and
+`DATABASE_CA_CERT` in a gitignored `.env.supabase`, then run
+`node --env-file=.env.supabase scripts/migrate.ts`. The runner records each migration in
+`drizzle.__drizzle_migrations` and applies pending ones in a single transaction. Apply a PR's
+migrations before merging it if its code depends on them.
+
+**Row-level security:** every table has RLS enabled with no policies, so Supabase's `anon` and
+`authenticated` API roles can read nothing; the app connects as the table owner, which bypasses
+it. feat-004 adds the handoff-document policy: agent tools reach `handoff_documents` with a
+short-lived token carrying the caller's `agent_role`, never the service-role key (PRD "How eve
+enforces this").
 
 ## Hosting: Vercel
 

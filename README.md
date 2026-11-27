@@ -18,7 +18,7 @@ Started from the Leverage Workshop skeleton (alpha-scout `962b09e`).
 | Area | What's in place |
 |---|---|
 | App | Next.js 16.4 (App Router), React 19.3, TypeScript 5, Tailwind CSS 4, Base UI, Zustand |
-| Database | Supabase Postgres 17 in production, `postgres:17` in Docker locally, plain `pg`, SQL migration runner (`db/migrations`, `scripts/migrate.ts`) |
+| Database | Supabase Postgres 17 in production, `postgres:17` in Docker locally, Drizzle ORM over `pg`; schema in `src/lib/db/schema`, migrations in `db/migrations` |
 | AI | Vercel AI SDK + AI Gateway. eve agents arrive with feat-003 |
 | Health checks | `GET /api/health/db` and `GET /api/health/ai` |
 | Quality gate | ESLint, `tsc`, Vitest (unit + DB integration), all run by `./init.sh` |
@@ -32,7 +32,7 @@ Requires Node 24 (`nvm use`) and Docker.
 npm install
 cp .env.example .env.local      # defaults point at the local Docker DB
 npm run db:up                   # Postgres 17, host port 5433
-npm run db:migrate              # applies db/migrations/*.sql
+npm run db:migrate              # applies the Drizzle migrations in db/migrations
 npm run dev                     # http://localhost:3200
 ```
 
@@ -43,8 +43,10 @@ npm run dev                     # http://localhost:3200
 | `dev` / `build` / `start` | Next.js (port 3200) |
 | `lint` / `typecheck` / `test` | ESLint, `tsc --noEmit`, Vitest |
 | `db:up` / `db:down` | Local Postgres via Docker Compose |
-| `db:migrate` | Apply pending SQL migrations (tracked in `schema_migrations`) |
-| `./init.sh [--quick]` | The full pre-push gate: `npm ci` if needed, lint, typecheck, test, build |
+| `db:migrate` | Apply pending migrations (tracked in `drizzle.__drizzle_migrations`) |
+| `db:generate` | Generate a migration from schema changes: `npm run db:generate -- --name <change>` (add `--custom` for hand-written SQL) |
+| `db:drift` | Fail if the schema has changes with no migration (run by `./init.sh`) |
+| `./init.sh [--quick]` | The full pre-push gate: `npm ci` if needed, lint, typecheck, schema drift, test, build |
 
 DB integration tests in `tests/` run only when `DATABASE_URL` is exported (Vitest doesn't read
 `.env.local`):

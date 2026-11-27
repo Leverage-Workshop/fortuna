@@ -5,9 +5,9 @@
       "name": "M1: Data layer",
       "description": "Adopt Drizzle (PRD 'Tech stack') and create the twelve tables in PRD 'Data model', with forecasts immutable once written. Migrations apply to local Docker Postgres and Supabase; DB integration tests cover the schema.",
       "dependencies": [],
-      "status": "not-started",
+      "status": "in-progress",
       "blocked_on": "",
-      "evidence": ""
+      "evidence": "Branch feat/data-layer. Local: npm run db:migrate applied 0000_init_schema + 0001_forecasts_immutable to postgres:17 (re-run is a no-op); DATABASE_URL=...:5433/fortuna ./init.sh passed (lint, typecheck, db:drift, 24 tests incl. 15 DB integration, build). Supabase: pending."
     },
     {
       "id": "feat-002",
