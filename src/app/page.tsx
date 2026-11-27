@@ -1,8 +1,24 @@
-export default function Home() {
+import { connection } from "next/server";
+import { getDb } from "@/lib/db/client";
+import { listRuns } from "@/lib/report/load-run-report";
+import { RunList } from "@/components/runs/run-list";
+import { LABEL, PageTitle } from "@/components/ui/text";
+
+export default async function Home() {
+  await connection(); // runs change per request; never prerender this list at build time
+  const runs = await listRuns(getDb());
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-16">
-      <h1 className="text-3xl font-semibold">Fortuna</h1>
-      <p>Study the constraints, not the prince.</p>
-    </main>
+    <div className="flex flex-col gap-12">
+      <PageTitle eyebrow="Study the constraints, not the prince" wordmark>
+        Fortuna
+      </PageTitle>
+      <section aria-labelledby="runs-title" className="flex flex-col gap-6">
+        <h2 id="runs-title" className={LABEL}>
+          Runs
+        </h2>
+        <RunList runs={runs} />
+      </section>
+    </div>
   );
 }

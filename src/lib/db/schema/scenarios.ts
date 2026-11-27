@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, date, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
-import { regimeType } from "./enums";
+import { regimeType } from "./enums.ts";
 
 /**
  * A user's question and its as-of date. `contaminated` has no default: the caller must say

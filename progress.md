@@ -6,23 +6,27 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 ## Current State
 
 **Last Updated:** 2026-11-27
-**Active Feature:** none. feat-001 (M1 data layer) is done; next is feat-002 or feat-003.
+**Active Feature:** none. feat-002 (Brexit fixture + run report) is done; next is feat-003.
 
 ### What's Done
 
 - [x] Bootstrapped from the Leverage Workshop skeleton (alpha-scout `962b09e`): renamed, PRD installed
       as `docs/PRODUCT.md`, demo chat/NFL code and TimescaleDB removed, harness reset
-- [x] `DESIGN.md` design system, referenced from `AGENTS.md` (docs only; not yet applied to the app)
+- [x] `DESIGN.md` design system, referenced from `AGENTS.md`; applied to the app in feat-002
 - [x] Infrastructure: Supabase `fortuna`, Vercel `fortuna` (functions in `cle1`), https://fortuna.leverageworkshop.com
       with `/api/health/db` and `/api/health/ai` → 200
 
 - [x] feat-001: Drizzle 0.45.4 / drizzle-kit 0.31.11, the twelve PRD tables (RLS on, no policies),
       immutable forecasts (trigger + RESTRICT FK), schema-drift check in `./init.sh`; migrations
       applied to Supabase (2026-11-27)
+- [x] feat-002: Brexit fixture (`npm run db:seed:brexit`), run report at `/runs/[runId]` with all twelve
+      PRD sections (three built, nine "Not built yet (Mn)"), runs list on `/`, DESIGN.md tokens and fonts
 
 ### What's Next
 
-1. feat-002 (Brexit fixture + run report) or feat-003 (eve + parser); both depend only on feat-001.
+1. Seed the fixture on Supabase once the owner approves (`docs/INFRASTRUCTURE.md` "Fixture data"): it is
+   permanent, since forecasts are immutable. Until then production's run list is empty.
+2. feat-003 (eve + scenario parser), the last M1 feature.
 
 ## Blockers / Risks
 
@@ -61,6 +65,15 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 - **Design system in `DESIGN.md`** (2026-11-26): adapted from a getdesign.md extraction of The Verge's 2024 site.
   Dark only; Anton / Space Grotesk / JetBrains Mono / Newsreader via `next/font/google`; Tailwind 4 `@theme` tokens
   in §9. It is applied in the same PR as the first UI feature (feat-002), not before.
+- **Run report structure (feat-002)**: `src/lib/report/sections.ts` lists the PRD's twelve sections with the
+  milestone that fills each; a feature that builds one flips `built` and adds its component to `RunReportView`.
+  The page reads through `loadRunReport` (sequential queries: it may get one connection or a transaction).
+  Rows render with anchor IDs (`forecast-<id>`, `option-<id>`, …) so later sections can link numbers to rows.
+- **Brexit fixture is data, not a run**: fixed IDs (`b2e01600-…`), model `fixture`, null tokens/cost, run cost $0,
+  contaminated. Baselines are the PRD's e^(−0.5 × load) arithmetic, checked in `brexit.test.ts`, not computed by
+  app code (the aggregation module belongs to M3). Rationales reuse each lens's PRD finding. No market link: the
+  PRD's 45¢ contract is illustrative and would mislead the M5 snapshot job.
+- **Schema files import with `.ts` extensions** so plain-Node scripts (`scripts/seed-brexit.ts`) can load them.
 - **PR template** at `.github/pull_request_template.md`. Core sections follow common industry guidance:
   summary/why, changes, how to review, test plan, risk/rollback. Migrations, config and screenshots are conditional.
 
@@ -69,6 +82,22 @@ Running log for agent sessions. Update **Current State** in place; add a dated e
 (Per-feature evidence lives in `feature_list.json`.)
 
 ## History
+
+### 2026-11-27: feat-002 Brexit fixture and run report
+
+- Fixture data in `src/lib/fixtures/brexit.ts` (PRD "Worked example: Brexit": 4 actors, 2 decision points,
+  6 options, 24 constraint scores, 10 agent outputs, 3 forecasts with the judge override), seeded by
+  `seedBrexitFixture` via `npm run db:seed:brexit` in one transaction, idempotent.
+- Run report `/runs/[runId]`: Summary (feature tile, contaminated pill, override reason one click away), Run trace
+  and cost, Scenario breakdown; the other nine sections render "Not built yet (Mn)", and built sections with no rows
+  say "No data for this run." Home lists runs. Applied DESIGN.md §9 (tokens, four fonts, dark only), plus root
+  `error.tsx` (16.4's `retry` prop) and `not-found.tsx`.
+- Verified: `DATABASE_URL=…:5433/fortuna ./init.sh` passed (lint, typecheck, drift, 51 tests incl. 20 DB integration,
+  build). Seeded local Docker twice (second run no-op). `next start`: `/` 200, fixture report 200, unknown and
+  malformed run IDs 404; headless screenshots at 1440px and 375px checked against DESIGN.md §10.
+- Not built (no feature entry): the report's Markdown export, and number-to-row links (anchors exist; the
+  sections that link arrive with M2/M3). Run trace shows the eve session ID as text until feat-003 defines the
+  Agent Runs trace URL.
 
 ### 2026-11-27: feat-001 Supabase verification
 

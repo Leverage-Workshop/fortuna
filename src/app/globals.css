@@ -1,23 +1,57 @@
 @import "tailwindcss";
 
+/* Tokens from DESIGN.md §3 and §5. Change a token there first, then here. */
+@theme {
+  --color-canvas: #131313;
+  --color-surface: #2d2d2d;
+  --color-hairline: #313131;
+  --color-ink: #ffffff;
+  --color-ink-soft: #e9e9e9;
+  --color-ink-muted: #949494;
+  --color-mint: #3cffd0;
+  --color-mint-deep: #309875;
+  --color-violet: #5200ff;
+  --color-violet-deep: #3d00bf;
+  --color-yellow: #ffd23f;
+  --color-pink: #ff4f8b;
+  --color-orange: #ff7a1a;
+  --color-focus: #1eaedb;
+
+  --radius-tag: 2px;
+  --radius-frame: 4px;
+  --radius-pill-sm: 20px;
+  --radius-card: 20px;
+  --radius-feature: 24px;
+  --radius-pill-lg: 40px;
+}
+
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --font-display: var(--font-anton), Impact, sans-serif;
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-serif: var(--font-newsreader), Georgia, serif;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

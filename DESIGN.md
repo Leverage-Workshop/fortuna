@@ -293,9 +293,8 @@ Touch targets are at least 44px. Mono labels never go below 11px.
 
 ## 9. Implementation (Next.js 16 + Tailwind 4)
 
-This section shows how to apply the system. The app does not use it yet: `src/app/globals.css`
-still has the skeleton's light/dark tokens. Apply this the first time a UI feature is built, in
-the same PR.
+This section shows how the system is applied. It landed with the run report (feat-002):
+`src/app/fonts.ts`, `src/app/globals.css`, and shared pieces in `src/components/ui`.
 
 ### Fonts (`src/app/fonts.ts`)
 
@@ -320,7 +319,6 @@ export const newsreader = Newsreader({
 
 ```css
 @import "tailwindcss";
-@source "../../node_modules/streamdown/dist/*.js";
 
 @theme {
   --color-canvas: #131313;
@@ -376,7 +374,8 @@ body {
 }
 ```
 
-Dark only: remove the skeleton's `prefers-color-scheme` block when you apply this. Classes then
+Dark only: there is no `prefers-color-scheme` block. When Streamdown is added for streaming
+model prose, add `@source "../../node_modules/streamdown/dist/*.js";` after the import. Classes
 read as `bg-canvas`, `text-ink-muted`, `border-hairline`, `rounded-card`, `font-mono`, and so
 on. Use `tabular-nums` on every number.
 

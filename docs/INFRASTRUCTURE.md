@@ -35,6 +35,10 @@ because Preview and Production share this database. Put the production `DATABASE
 `drizzle.__drizzle_migrations` and applies pending ones in a single transaction. Apply a PR's
 migrations before merging it if its code depends on them.
 
+**Fixture data:** `node --env-file=.env.supabase scripts/seed-brexit.ts` seeds the PRD's Brexit
+walkthrough as one contaminated run with fixed IDs (report at `/runs/b2e01600-0000-4000-8000-000000000002`).
+It is idempotent, but permanent: forecasts are immutable and their run can't be deleted.
+
 **Row-level security:** every table has RLS enabled with no policies, so Supabase's `anon` and
 `authenticated` API roles can read nothing; the app connects as the table owner, which bypasses
 it. feat-004 adds the handoff-document policy: agent tools reach `handoff_documents` with a

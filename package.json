@@ -18,7 +18,8 @@
     "db:down": "docker compose down",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts",
     "db:generate": "drizzle-kit generate",
-    "db:drift": "scripts/check-schema-drift.sh"
+    "db:drift": "scripts/check-schema-drift.sh",
+    "db:seed:brexit": "node --env-file-if-exists=.env.local scripts/seed-brexit.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
